@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - RoLicense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="panel-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">RL</div>
+                <span class="sidebar-logo-text">RoLicense</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-tab="products">
+                    <span class="nav-icon">📦</span>
+                    <span>Products</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div class="user-name" id="userName">User</div>
+                        <div class="user-email" id="userEmail">user@email.com</div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-block mt-1" id="logoutBtn" style="padding: 0.5rem;">
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="tab-overview">
+                <div class="page-header">
+                    <h1 class="page-title">Overview</h1>
+                    <p class="page-subtitle">Welcome back! Here's a summary of your licensing activity.</p>
+                </div>
+
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Products</div>
+                        <div class="stat-value accent" id="statProducts">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="statUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Whitelisted Places</div>
+                        <div class="stat-value" id="statWhitelisted">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Verification</div>
+                        <div class="stat-value" id="statPending">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div id="recentActivity">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p class="empty-state-title">No recent activity</p>
+                            <p>Create a product to start tracking usage.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div class="tab-content" id="tab-products">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Products</h1>
+                        <p class="page-subtitle">Manage your licensed products</p>
+                    </div>
+                    <button class="btn btn-primary" id="addProductBtn">
+                        + Add Product
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Users</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- Products will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="productsEmpty" class="empty-state hidden">
+                        <div class="empty-state-icon">📦</div>
+                        <p class="empty-state-title">No products yet</p>
+                        <p>Create your first product to get started.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal-overlay" id="addProductModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Product</h3>
+                <button class="modal-close" onclick="closeModal('addProductModal')">&times;</button>
+            </div>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" class="form-input" id="productName" placeholder="e.g., My Admin Script" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description (optional)</label>
+                    <input type="text" class="form-input" id="productDesc" placeholder="Short description">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProductModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Script Modal -->
+    <div class="modal-overlay" id="viewScriptModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Roblox Script</h3>
+                <button class="modal-close" onclick="closeModal('viewScriptModal')">&times;</button>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Copy this script and place it in <strong>ServerScriptService</strong> in your Roblox game.
+            </p>
+            <div class="script-container">
+                <button class="copy-btn" onclick="copyScript()">Copy</button>
+                <pre class="script-code" id="scriptContent"></pre>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('viewScriptModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Users Modal -->
+    <div class="modal-overlay" id="viewUsersModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Product Users - <span id="viewUsersProductName"></span></h3>
+                <button class="modal-close" onclick="closeModal('viewUsersModal')">&times;</button>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <p style="color: var(--text-secondary);">Games using this product</p>
+                <button class="btn btn-sm btn-primary" id="addWhitelistBtn">+ Add Whitelist</button>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Game Name</th>
+                            <th>Place ID</th>
+                            <th>Status</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="usersEmpty" class="empty-state hidden">
+                <div class="empty-state-icon">👥</div>
+                <p class="empty-state-title">No users yet</p>
+                <p>This product hasn't been used in any games yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Whitelist Modal -->
+    <div class="modal-overlay" id="addWhitelistModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add to Whitelist</h3>
+                <button class="modal-close" onclick="closeModal('addWhitelistModal')">&times;</button>
+            </div>
+            <form id="addWhitelistForm">
+                <div class="form-group">
+                    <label class="form-label">Place ID</label>
+                    <input type="text" class="form-input" id="whitelistPlaceId" placeholder="e.g., 123456789" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Game Name</label>
+                    <input type="text" class="form-input" id="whitelistGameName" placeholder="e.g., My Cool Game" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addWhitelistModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add to Whitelist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/panel.js"></script>
+</body>
+</html>

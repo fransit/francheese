@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RoLicense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">RL</div>
+                <h1 class="auth-title">Welcome back</h1>
+                <p class="auth-subtitle">Login to your account</p>
+            </div>
+
+            <div id="alert" class="alert hidden"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    Login
+                </button>
+            </form>
+
+            <p class="text-center mt-2" style="color: var(--text-secondary);">
+                Don't have an account? <a href="/register">Register</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const alert = document.getElementById('alert');
+            const submitBtn = document.getElementById('submitBtn');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Logging in...';
+            alert.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    alert.className = 'alert alert-success';
+                    alert.textContent = 'Login successful! Redirecting...';
+                    alert.classList.remove('hidden');
+                    setTimeout(() => {
+                        window.location.href = '/panel';
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                alert.className = 'alert alert-error';
+                alert.textContent = error.message;
+                alert.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        });
+
+        // Check if already logged in
+        checkAuth();
+    </script>
+</body>
+</html>
